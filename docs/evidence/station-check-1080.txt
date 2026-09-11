@@ -1,0 +1,4 @@
+Graphics preflight 2026-09-11T23:48:22.476Z. Robot swerve-generic; rapier-0.19.3-force-1.0.0.
+HIGH PASS — 180 measured frames after 30 warm-up frames; frame p95 9.4 ms; physics p95 0.40 ms / two ticks; frame CPU work p95 2.90 ms; longest frame 10.2 ms; 167 draw calls; 56,894 triangles; internal output 1920×1080; browser 1440×1000.
+Selected high, the highest tested passing tier. Settings and output remain fixed during each measured run.
+Warm-up and timings use the same T03 geometry at every tier. The standard workload advances two fixed 1/120-second physics ticks per rendered frame. CPU work includes physics, visual updates and WebGL command submission; frame intervals also capture scheduling and rendering pressure. This short software check does not measure physical controller latency, sustained thermal performance, USB compatibility, or real-robot fidelity.

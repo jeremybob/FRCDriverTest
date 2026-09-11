@@ -1,0 +1,7 @@
+# Published core course fixtures, version 1.0.0
+
+Executable source: `src/tests/courses.ts`. All distances are meters, yaw radians, field X 0–16 / Y 0–8. Gate yaw specifies the forward crossing normal; its opening extends along local Y. Bays use full bumper containment. No seasonal field claim.
+
+T01 publishes near/middle/far targets at X 5/9/13. T02 publishes balanced headings 0/180/90/270 degrees. T03 uses five outbound and five returning gates at 2 m longitudinal spacing, with 0.5 m lateral offsets for differential and 0.7 m for holonomic profiles. T04 straight/offset/angled openings have bumper width plus 0.20 m. T05 entry X=7 and front-bumper target X=10.5/11.5/12.5; accepted entry speed is 65–80% preset maximum. T06 publishes a seeded three-event sequence containing both directions (an exactly equal left/right count is impossible with three events); delays are 0.7–1.3 s after the approach gate. Seed, drivetrain, and control frame belong to the course profile ID.
+
+These are initial development fixtures. Turning pockets and straight run-up are provided; mathematical geometry checks are not measured robot feasibility/calibration. Hardware and coach feasibility review remain required before qualification. Different seeds and drivetrain/control-frame profiles are not presumed equivalent. T06 initial heading is +X; differential cue response is positive/negative turn, holonomic response is field-left/right translation under the frozen frame.
