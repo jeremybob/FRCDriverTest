@@ -89,6 +89,11 @@ export default function App() {
   } | null>(null);
   const [newName, setNewName] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
+  const [expired, setExpired] = useState(
+    () => Date.now() >= Date.parse(session.expiresAt),
+  );
+  const [expiryPrompt, setExpiryPrompt] = useState(false);
+  const expiryDialog = useRef<HTMLDialogElement>(null);
   const [updateReady, setUpdateReady] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const driver =
@@ -129,15 +134,22 @@ export default function App() {
     return () => window.removeEventListener("driver-lab-update", onUpdate);
   }, []);
   useEffect(() => {
-    const t = setInterval(() => {
-      if (Date.now() >= Date.parse(session.expiresAt)) {
-        setToast(
-          "This session reached its eight-hour expiry. Export the results, then end the session. New attempts are disabled.",
-        );
-      }
-    }, 60000);
-    return () => clearInterval(t);
+    const checkExpiry = () =>
+      setExpired(Date.now() >= Date.parse(session.expiresAt));
+    checkExpiry();
+    const t = setInterval(checkExpiry, 60000);
+    window.addEventListener("focus", checkExpiry);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener("focus", checkExpiry);
+    };
   }, [session.expiresAt]);
+  useEffect(() => {
+    const dialog = expiryDialog.current;
+    if (!expiryPrompt || !dialog) return;
+    dialog.showModal();
+    return () => dialog.close();
+  }, [expiryPrompt]);
   const changeProfile = (p: Profile) => {
     if (locked) {
       setToast(
@@ -154,7 +166,8 @@ export default function App() {
       return;
     }
     if (Date.now() >= Date.parse(session.expiresAt)) {
-      setToast("Session expired. Export results and end the session first.");
+      setExpired(true);
+      setExpiryPrompt(true);
       return;
     }
     if (mode === "scored") {
@@ -218,6 +231,7 @@ export default function App() {
     setEnded(true);
     setSession(fresh());
     setConfirmClear(false);
+    setExpiryPrompt(false);
     setPage("home");
     setToast(r.notice ?? "Session cleared.");
   };
@@ -456,6 +470,35 @@ export default function App() {
           </div>
         </header>
         <main>
+          {expired && (
+            <section
+              className="notice warning session-expiry"
+              role="status"
+              aria-label="Session expired"
+            >
+              <div>
+                <strong>This session has expired.</strong>
+                <p>
+                  Sessions last eight hours. Export any results, then end this
+                  session to start driving again.
+                </p>
+              </div>
+              <div className="button-row">
+                <button
+                  className="secondary"
+                  onClick={() => setPage("reports")}
+                >
+                  Review reports
+                </button>
+                <button
+                  className="primary"
+                  onClick={() => setConfirmClear(true)}
+                >
+                  End expired session
+                </button>
+              </div>
+            </section>
+          )}
           {storageNotice && (
             <div className="notice warning">{storageNotice}</div>
           )}
@@ -1277,6 +1320,44 @@ export default function App() {
             <X size={17} />
           </button>
         </div>
+      )}
+      {expiryPrompt && (
+        <dialog
+          ref={expiryDialog}
+          className="confirm-modal expiry-dialog"
+          role="alertdialog"
+          aria-labelledby="expiry-title"
+          aria-describedby="expiry-description"
+          onClose={() => setExpiryPrompt(false)}
+        >
+          <h2 id="expiry-title">Start a fresh session to drive.</h2>
+          <p id="expiry-description">
+            This tab’s eight-hour session has expired. Free Drive, practice, and
+            assessments need a new session. Your current results and notes are
+            still available to export.
+          </p>
+          <div className="button-row">
+            <button
+              className="secondary"
+              autoFocus
+              onClick={() => {
+                setExpiryPrompt(false);
+                setPage("reports");
+              }}
+            >
+              Review reports
+            </button>
+            <button
+              className="primary"
+              onClick={() => {
+                setExpiryPrompt(false);
+                setConfirmClear(true);
+              }}
+            >
+              End expired session
+            </button>
+          </div>
+        </dialog>
       )}
       {confirmClear && (
         <div className="modal-backdrop">

@@ -56,3 +56,9 @@ A second content-hashed build was downloaded while a session remained active. Ac
 4. **Sustained hardware performance:** minimum-machine 1080p qualification, total CPU/GPU memory, physical latency and 60-minute cohort soak remain unmeasured. The short software gate is enforced separately.
 5. **Font coverage:** unsupported PDF glyphs use explicit Unicode code points; HTML retains original characters.
 6. **Deployment environment:** school filtering, managed-browser policy and HTTPS hosting on the team's actual network are unverified. The local application and reproducible static build are complete.
+
+## September 12: overnight-session startup fix
+
+Reproduced the reported Free Drive/practice buttons doing nothing in the actual Codex browser tab. The tab's eight-hour session had expired; the start guard only emitted a temporary toast. Expiry now stays visible in a banner, and a blocked start opens a keyboard-accessible dialog with report review and explicit session-ending actions. Returning focus refreshes expiry state. Existing results and notes remain available until the user confirms clearing.
+
+Validation: strict typecheck, all 121 unit/scenario tests, production build and formatting passed. The targeted browser run passed the existing major-screen/three-drivetrain workflow and a new overnight regression covering Free Drive, guided practice, Escape dismissal, retained notes, canceling the clear action, and driving after explicit clearing/new-session creation. Free Drive and Distance Docking were also opened in a fresh Codex browser tab while preserving the user's original expired tab. The new dialog screenshot was inspected.

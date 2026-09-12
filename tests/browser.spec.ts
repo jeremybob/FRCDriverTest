@@ -321,3 +321,68 @@ test("keyboard completes recorded distance docking and report retains the score"
   await page.getByRole("button", { name: "Play replay", exact: true }).click();
   await page.getByRole("button", { name: "Pause replay", exact: true }).click();
 });
+
+test("overnight expiry explains blocked drive clicks and preserves notes until explicit clearing", async ({
+  page,
+}) => {
+  const start = Date.now();
+  await page.clock.setFixedTime(start);
+  await page.goto("/");
+  await navigate(page, "Driver reports");
+  await page
+    .getByLabel("Coach notes")
+    .fill("Keep this observation until exported.");
+  await navigate(page, "Overview");
+  // Only wall-clock Date advances. Physics/RAF timing is untouched.
+  await page.clock.setFixedTime(start + 8 * 60 * 60 * 1000 + 1);
+  await page
+    .getByRole("button", { name: "Enter free drive", exact: true })
+    .click();
+  const prompt = page.getByRole("alertdialog");
+  await expect(prompt).toContainText("eight-hour session has expired");
+  await expect(
+    page.getByRole("status", { name: "Session expired" }),
+  ).toBeVisible();
+  await page.screenshot({ path: `${output}/expired-session-dialog.png` });
+  await prompt
+    .getByRole("button", { name: "Review reports", exact: true })
+    .click();
+  await expect(page.getByLabel("Coach notes")).toHaveValue(
+    "Keep this observation until exported.",
+  );
+  await navigate(page, "Practice");
+  await page
+    .getByRole("button", { name: "Practice this skill" })
+    .first()
+    .click();
+  await expect(prompt).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(prompt).toBeHidden();
+  await expect(
+    page.getByRole("status", { name: "Session expired" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Practice this skill" })
+    .first()
+    .click();
+  await prompt.getByRole("button", { name: "End expired session" }).click();
+  await page.getByRole("button", { name: "Keep session", exact: true }).click();
+  await navigate(page, "Driver reports");
+  await expect(page.getByLabel("Coach notes")).toHaveValue(
+    "Keep this observation until exported.",
+  );
+  await page
+    .getByRole("button", { name: "End expired session", exact: true })
+    .click();
+  await page.getByRole("button", { name: "End & clear", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Start a new session", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status", { name: "Session expired" }),
+  ).toHaveCount(0);
+  await free(page);
+  await expect(
+    page.getByRole("button", { name: "Pause", exact: true }),
+  ).toBeVisible();
+});

@@ -2689,3 +2689,25 @@ th {
 .replay > button {
   margin-top: 12px;
 }
+
+.session-expiry {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.session-expiry p {
+  margin: 6px 0 0;
+}
+.session-expiry .button-row {
+  flex-wrap: wrap;
+}
+.expiry-dialog {
+  border: 0;
+  color: var(--ink);
+}
+.expiry-dialog::backdrop {
+  background: #13262999;
+  backdrop-filter: blur(5px);
+}
+.expiry-dialog .button-row {
+  flex-wrap: wrap;
+}
